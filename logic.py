@@ -50,6 +50,8 @@ def merge_row(row):
         The merged row.
     n_merges: int
         Number of successfull merges.'''
+    # The whole API is purely functional
+    row = np.copy(row)
     last_merge = -1
     n_merges = 0
     for i in range(0, row.size):
@@ -136,6 +138,8 @@ def merge(board, action):
     n_merges: int
         Number of successful merges.
     '''
+    # purely function API
+    board = np.copy(board)
     n_merges = 0
     board = transform_before_merge(board, action)
     n_rows, _ = board.shape
