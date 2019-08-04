@@ -36,7 +36,7 @@ class Action(Enum):
     DOWN = auto()
 
 
-def game_step(game: Game, action: Action):
+def game_step(game: Game, action: Action) -> Game:
     '''Executes one game step for the given game.
 
     Parameters
@@ -58,7 +58,7 @@ def game_step(game: Game, action: Action):
     return game
 
 
-def generate_element(board: np.array):
+def generate_element(board: np.array) -> np.array:
     '''Randomly generates a 2 or 4 on the board on an empty field.
 
     Parameters
@@ -82,7 +82,7 @@ def generate_element(board: np.array):
     return board
 
 
-def new_board(shape: tuple):
+def new_board(shape: tuple) -> np.array:
     '''Generates a new board with two randomly generated elements.
 
     Parameters
@@ -100,7 +100,7 @@ def new_board(shape: tuple):
     return board
 
 
-def first_free_in_row(row: np.array):
+def first_free_in_row(row: np.array) -> int:
     '''Searches the index of the first free element (0) in a row.
 
     Paramters
@@ -119,7 +119,7 @@ def first_free_in_row(row: np.array):
     return row.size
 
 
-def merge_row(row: np.array):
+def merge_row(row: np.array) -> (np.array, int):
     '''Merges one row from left to right. Transform the board apply the merge
     and transform it back afterwards.
 
@@ -155,7 +155,7 @@ def merge_row(row: np.array):
     return row, score
 
 
-def transform_before_merge(board: np.array, action: Action):
+def transform_before_merge(board: np.array, action: Action) -> np.array:
     '''Transforms the board so the the board can be merged row by row.
 
     Parameters
@@ -180,7 +180,7 @@ def transform_before_merge(board: np.array, action: Action):
     return board
 
 
-def transform_after_merge(board: np.array, action: Action):
+def transform_after_merge(board: np.array, action: Action) -> np.array:
     '''Transforms the board after the merge has been executed
 
     Parameters
@@ -205,7 +205,7 @@ def transform_after_merge(board: np.array, action: Action):
     return board
 
 
-def merge(board: np.array, action: Action):
+def merge(board: np.array, action: Action) -> (np.array, int):
     '''Merges the rows or columns of the board depending on the action taken.
 
     Parameters
@@ -234,8 +234,8 @@ def merge(board: np.array, action: Action):
     return board, score
 
 
-def is_finished(board: np.array):
-    '''Checks if any action is possible.
+def is_finished(board: np.array) -> bool:
+    '''Checks if any action is possible: Any zero or score is possible
 
     Parameters
     ----------
@@ -246,6 +246,8 @@ def is_finished(board: np.array):
     -------
     result: bool
         True if no action is possible, false otherwise.'''
+    if len(np.where(board == 0)[0]) > 0:
+        return False
     for action in Action:
         _, n_merges = merge(board, action)
         if n_merges > 0:

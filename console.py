@@ -3,7 +3,7 @@ import logic
 
 
 def main():
-    game = logic.Game()
+    game = logic.Game((2,2))
     while not game.finished:
         print(game)
         action = input("Enter action: LEFT, RIGHT, UP, DOWN\n")
