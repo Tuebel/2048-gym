@@ -51,10 +51,12 @@ def game_step(game: Game, action: Action) -> Game:
     game: Game
         The new state of the game.'''
     game = deepcopy(game)
-    game.board, score = merge(game.board, action)
-    game.score += score
-    game.board = generate_element(game.board)
-    game.finished = is_finished(game.board)
+    game.board, score, valid = merge(game.board, action)
+    # if action has not been valid the game state didn't change
+    if valid:
+        game.score += score
+        game.board = generate_element(game.board)
+        game.finished = is_finished(game.board)
     return game
 
 
@@ -119,42 +121,6 @@ def first_free_in_row(row: np.array) -> int:
     return row.size
 
 
-def merge_row(row: np.array) -> (np.array, int):
-    '''Merges one row from left to right. Transform the board apply the merge
-    and transform it back afterwards.
-
-    Paramters
-    ---------
-    row: numpy.array
-        The row to merge.
-
-    Returns
-    -------
-    row: numpy.array
-        The merged row.
-    score: int
-        Sum of the merged numbers.'''
-    # The whole API is purely functional
-    row = np.copy(row)
-    last_merge = -1
-    score = 0
-    for i in range(0, row.size):
-        # move as far left as possible
-        new_index = first_free_in_row(row)
-        if new_index < i:
-            row[new_index] = row[i]
-            row[i] = 0
-        else:
-            new_index = i
-        # merge possible?
-        if (last_merge < new_index - 1
-                and row[new_index - 1] == row[new_index]):
-            row[new_index - 1] = 2 * row[new_index - 1]
-            row[new_index] = 0
-            score += row[new_index - 1]
-    return row, score
-
-
 def transform_before_merge(board: np.array, action: Action) -> np.array:
     '''Transforms the board so the the board can be merged row by row.
 
@@ -205,7 +171,50 @@ def transform_after_merge(board: np.array, action: Action) -> np.array:
     return board
 
 
-def merge(board: np.array, action: Action) -> (np.array, int):
+def merge_row(row: np.array) -> (np.array, int, bool):
+    '''Merges one row from left to right. Transform the board apply the merge
+    and transform it back afterwards.
+
+    Paramters
+    ---------
+    row: numpy.array
+        The row to merge.
+
+    Returns
+    -------
+    row: numpy.array
+        The merged row.
+    score: int
+        Sum of the merged numbers.
+    valid: bool
+        True if any element has been moved. False otherwise.'''
+    # The whole API is purely functional
+    row = np.copy(row)
+    last_merge = -1
+    score = 0
+    valid = False
+    for i in range(0, row.size):
+        if row[i] == 0:
+            continue
+        # move as far left as possible
+        new_index = first_free_in_row(row)
+        if new_index < i:
+            row[new_index] = row[i]
+            row[i] = 0
+            valid = True
+        else:
+            new_index = i
+        # merge possible?
+        if (last_merge < new_index - 1
+                and row[new_index - 1] == row[new_index]):
+            row[new_index - 1] = 2 * row[new_index - 1]
+            row[new_index] = 0
+            score += row[new_index - 1]
+            valid = True
+    return row, score, valid
+
+
+def merge(board: np.array, action: Action) -> (np.array, int, bool):
     '''Merges the rows or columns of the board depending on the action taken.
 
     Parameters
@@ -221,17 +230,20 @@ def merge(board: np.array, action: Action) -> (np.array, int):
         The board after the merge action has been executed.
     score: int
         Sum of the merged numbers within this action.
-    '''
+    valid: bool
+        True if any element has been moved. False otherwise.'''
     # purely function API
     board = np.copy(board)
     score = 0
+    valid = False
     board = transform_before_merge(board, action)
     n_rows, _ = board.shape
     for row in range(0, n_rows):
-        board[row, :], row_score = merge_row(board[row, :])
+        board[row, :], row_score, row_valid = merge_row(board[row, :])
         score += row_score
+        valid |= row_valid
     board = transform_after_merge(board, action)
-    return board, score
+    return board, score, valid
 
 
 def is_finished(board: np.array) -> bool:
@@ -249,7 +261,7 @@ def is_finished(board: np.array) -> bool:
     if len(np.where(board == 0)[0]) > 0:
         return False
     for action in Action:
-        _, n_merges = merge(board, action)
-        if n_merges > 0:
+        _, _, valid = merge(board, action)
+        if valid:
             return False
     return True
