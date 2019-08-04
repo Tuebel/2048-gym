@@ -1,10 +1,30 @@
+from copy import deepcopy
 from enum import Enum, auto
 import numpy as np
+from random import randrange, random
+'''The logic of the game 2048.
+Purely functional so copies are created of the state.'''
 
 
-class State():
-    def __init__(self):
-        self.board = np.zeros([4, 4])
+class Game:
+    '''The state of a game is represented by the board (numpy array).
+    Additionally the score must be stored and the information if the game is
+    finished'''
+
+    def __init__(self, shape=(4, 4)):
+        '''Generates a new game with a board and score
+
+        Parameters
+        ----------
+        shape: tuple
+            The dimensions of the board.
+        '''
+        self.board = new_board(shape)
+        self.score = 0
+        self.finished = False
+
+    def __repr__(self):
+        return f'{self.board}\n{self.score}\n{self.finished}'
 
 
 class Action(Enum):
@@ -16,7 +36,71 @@ class Action(Enum):
     DOWN = auto()
 
 
-def first_free(row):
+def game_step(game: Game, action: Action):
+    '''Executes one game step for the given game.
+
+    Parameters
+    ----------
+    game: Game
+        The current state of the game.
+    action:
+        The action to execute now.
+
+    Returns
+    -------
+    game: Game
+        The new state of the game.'''
+    game = deepcopy(game)
+    game.board, score = merge(game.board, action)
+    game.score += score
+    game.board = generate_element(game.board)
+    game.finished = is_finished(game.board)
+    return game
+
+
+def generate_element(board: np.array):
+    '''Randomly generates a 2 or 4 on the board on an empty field.
+
+    Parameters
+    ----------
+    board: numpy.array
+        The board with empty fields.
+
+    Returns
+    -------
+    board: numpy.array
+        The board with a new randomly generated number.'''
+    board = np.copy(board)
+    zero_elements = np.where(board == 0)
+    random_index = randrange(0, len(zero_elements[0]))
+    random_position = (
+        zero_elements[0][random_index], zero_elements[1][random_index])
+    if random() < 0.9:
+        board[random_position] = 2
+    else:
+        board[random_position] = 4
+    return board
+
+
+def new_board(shape: tuple):
+    '''Generates a new board with two randomly generated elements.
+
+    Parameters
+    ----------
+    shape: tuple
+        The shape of the board.
+
+    Returns
+    -------
+    board: numpy.array
+        The new board with two random elements.'''
+    board = np.zeros(shape)
+    board = generate_element(board)
+    board = generate_element(board)
+    return board
+
+
+def first_free_in_row(row: np.array):
     '''Searches the index of the first free element (0) in a row.
 
     Paramters
@@ -35,7 +119,7 @@ def first_free(row):
     return row.size
 
 
-def merge_row(row):
+def merge_row(row: np.array):
     '''Merges one row from left to right. Transform the board apply the merge
     and transform it back afterwards.
 
@@ -48,15 +132,15 @@ def merge_row(row):
     -------
     row: numpy.array
         The merged row.
-    n_merges: int
-        Number of successfull merges.'''
+    score: int
+        Sum of the merged numbers.'''
     # The whole API is purely functional
     row = np.copy(row)
     last_merge = -1
-    n_merges = 0
+    score = 0
     for i in range(0, row.size):
         # move as far left as possible
-        new_index = first_free(row)
+        new_index = first_free_in_row(row)
         if new_index < i:
             row[new_index] = row[i]
             row[i] = 0
@@ -67,11 +151,11 @@ def merge_row(row):
                 and row[new_index - 1] == row[new_index]):
             row[new_index - 1] = 2 * row[new_index - 1]
             row[new_index] = 0
-            n_merges += 1
-    return row, n_merges
+            score += row[new_index - 1]
+    return row, score
 
 
-def transform_before_merge(board, action):
+def transform_before_merge(board: np.array, action: Action):
     '''Transforms the board so the the board can be merged row by row.
 
     Parameters
@@ -96,7 +180,7 @@ def transform_before_merge(board, action):
     return board
 
 
-def transform_after_merge(board, action):
+def transform_after_merge(board: np.array, action: Action):
     '''Transforms the board after the merge has been executed
 
     Parameters
@@ -121,7 +205,7 @@ def transform_after_merge(board, action):
     return board
 
 
-def merge(board, action):
+def merge(board: np.array, action: Action):
     '''Merges the rows or columns of the board depending on the action taken.
 
     Parameters
@@ -135,16 +219,35 @@ def merge(board, action):
     -------
     board: numpy.array
         The board after the merge action has been executed.
-    n_merges: int
-        Number of successful merges.
+    score: int
+        Sum of the merged numbers within this action.
     '''
     # purely function API
     board = np.copy(board)
-    n_merges = 0
+    score = 0
     board = transform_before_merge(board, action)
     n_rows, _ = board.shape
     for row in range(0, n_rows):
-        board[row, :], n_m = merge_row(board[row, :])
-        n_merges += n_m
+        board[row, :], row_score = merge_row(board[row, :])
+        score += row_score
     board = transform_after_merge(board, action)
-    return board, n_merges
+    return board, score
+
+
+def is_finished(board: np.array):
+    '''Checks if any action is possible.
+
+    Parameters
+    ----------
+    board: numpy.array
+        The board to check.
+
+    Returns
+    -------
+    result: bool
+        True if no action is possible, false otherwise.'''
+    for action in Action:
+        _, n_merges = merge(board, action)
+        if n_merges > 0:
+            return False
+    return True
