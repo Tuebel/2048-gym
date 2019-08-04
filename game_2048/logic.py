@@ -30,10 +30,10 @@ class Game:
 class Action(Enum):
     '''The state of the game is represented as two dimensional numpy array.
     It is row major.'''
-    LEFT = auto()
-    RIGHT = auto()
-    UP = auto()
-    DOWN = auto()
+    LEFT = 0
+    RIGHT = 1
+    UP = 2
+    DOWN = 3
 
 
 def game_step(game: Game, action: Action) -> Game:

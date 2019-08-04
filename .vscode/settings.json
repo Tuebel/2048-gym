@@ -6,6 +6,8 @@
     "numpy"
   ],
   "cSpell.ignoreWords": [
+    "dtype",
+    "envs",
     "fliplr"
   ]
 }
