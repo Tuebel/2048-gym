@@ -1,7 +1,7 @@
 from copy import deepcopy
-from enum import Enum, auto
+from enum import Enum
 import numpy as np
-from random import randrange, random
+import random
 '''The logic of the game 2048.
 Purely functional so copies are created of the state.'''
 
@@ -22,9 +22,16 @@ class Game:
         self.board = new_board(shape)
         self.score = 0
         self.finished = False
+        seed()
 
     def __repr__(self):
         return f'{self.board}\n{self.score}\n{self.finished}'
+
+    def reset(self):
+        '''Resets the game to the initial state.'''
+        self.board = new_board(self.board.shape)
+        self.score = 0
+        self.finished = False
 
 
 class Action(Enum):
@@ -36,20 +43,24 @@ class Action(Enum):
     DOWN = 3
 
 
-def game_step(game: Game, action: Action) -> Game:
+def game_step(game: Game, action: Action) -> (Game, int, bool):
     '''Executes one game step for the given game.
 
     Parameters
     ----------
     game: Game
         The current state of the game.
-    action:
+    action: Action
         The action to execute now.
 
     Returns
     -------
     game: Game
-        The new state of the game.'''
+        The new state of the game.
+    score: int
+        The score of this round.
+    valid: bool
+        If the action resulted in a valid move.'''
     game = deepcopy(game)
     game.board, score, valid = merge(game.board, action)
     # if action has not been valid the game state didn't change
@@ -57,7 +68,12 @@ def game_step(game: Game, action: Action) -> Game:
         game.score += score
         game.board = generate_element(game.board)
         game.finished = is_finished(game.board)
-    return game
+    return game, score, valid
+
+
+def seed(seed=None):
+    '''Set the seed of the random generator.'''
+    random.seed(seed)
 
 
 def generate_element(board: np.array) -> np.array:
@@ -74,10 +90,10 @@ def generate_element(board: np.array) -> np.array:
         The board with a new randomly generated number.'''
     board = np.copy(board)
     zero_elements = np.where(board == 0)
-    random_index = randrange(0, len(zero_elements[0]))
+    random_index = random.randrange(0, len(zero_elements[0]))
     random_position = (
         zero_elements[0][random_index], zero_elements[1][random_index])
-    if random() < 0.9:
+    if random.random() < 0.9:
         board[random_position] = 2
     else:
         board[random_position] = 4
