@@ -1,4 +1,4 @@
-import game_2048.logic as logic
+import gym_2048.logic as logic
 import numpy as np
 import gym
 from gym import spaces
@@ -7,7 +7,6 @@ from six import StringIO
 
 
 class Env2048(gym.Env):
-
     def __init__(self, shape=(4, 4)):
         # parametrize the gym interface
         self.action_space = spaces.Discrete(4)
@@ -37,8 +36,8 @@ class Env2048(gym.Env):
         info: dict
             contains auxiliary diagnostic information
         '''
-        self.game, score, _ = logic.game_step(self.game, logic.Action(action))
-        return self.game.board, score, self.game.finished, None
+        self.game, _, _ = logic.game_step(self.game, logic.Action(action))
+        return self.game.board, self.game.score, self.game.finished, None
 
     def reset(self) -> object:
         """Resets the state of the environment and returns an initial observation.
@@ -60,7 +59,7 @@ class Env2048(gym.Env):
             - human: renders the board to the system output.
             - ansi: returns the string representation of the board."""
         outfile = StringIO() if mode == 'ansi' else sys.stdout
-        outfile.write(self.game.board)
+        outfile.write(str(self.game.board)+'\n')
         if mode != 'human':
             return outfile
 
