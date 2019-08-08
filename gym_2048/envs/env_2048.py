@@ -47,7 +47,8 @@ class Env2048(gym.Env):
                 return (self.game.board, -10, True, None)
         else:
             self.invalid_moves = 0
-            return (self.game.board, score, self.game.finished, None)
+        # return the score of the current move
+        return (self.game.board, score, self.game.finished, None)
 
     def reset(self) -> object:
         """Resets the state of the environment and returns an initial observation.
