@@ -16,6 +16,8 @@ class Env2048(gym.Env):
         self.reward_range = (-10., float('inf'))
         # init the game
         self.game = logic.Game(shape)
+        # prevent getting stuck with invalid moves
+        self.invalid_moves = 0
 
     def step(self, action) -> (object, float, bool, dict):
         '''Execute one action in the game.
@@ -36,8 +38,16 @@ class Env2048(gym.Env):
         info: dict
             contains auxiliary diagnostic information
         '''
-        self.game, _, _ = logic.game_step(self.game, logic.Action(action))
-        return self.game.board, self.game.score, self.game.finished, None
+        self.game, score, valid = logic.game_step(
+            self.game, logic.Action(action))
+        # stop on invalid move and penalize it
+        if not valid:
+            self.invalid_moves += 1
+            if self.invalid_moves > 10:
+                return (self.game.board, -10, True, None)
+        else:
+            self.invalid_moves = 0
+            return (self.game.board, score, self.game.finished, None)
 
     def reset(self) -> object:
         """Resets the state of the environment and returns an initial observation.
@@ -48,6 +58,7 @@ class Env2048(gym.Env):
             The initial observation.
         """
         self.game.reset()
+        self.invalid_moves = 0
         return self.game.board
 
     def render(self, mode='human'):
