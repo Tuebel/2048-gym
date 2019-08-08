@@ -13,7 +13,7 @@ class Env2048(gym.Env):
         self.observation_space = spaces.Box(
             low=0, high=2**32, shape=shape, dtype=np.uint32)
         self.metadata = {'render.modes': ['human', 'ansi']}
-        self.reward_range = (-10., float('inf'))
+        self.reward_range = (-100., float('inf'))
         # init the game
         self.game = logic.Game(shape)
         # prevent getting stuck with invalid moves
@@ -44,7 +44,7 @@ class Env2048(gym.Env):
         if not valid:
             self.invalid_moves += 1
             if self.invalid_moves > 10:
-                return (self.game.board, -10, True, None)
+                return (self.game.board, -50, True, None)
         else:
             self.invalid_moves = 0
         # return the score of the current move
