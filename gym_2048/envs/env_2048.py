@@ -9,14 +9,15 @@ from six import StringIO
 class Env2048(gym.Env):
     def __init__(self, shape=(4, 4)):
         # parametrize the gym interface
+        self.high_value = 2**16
         self.action_space = spaces.Discrete(4)
         self.observation_space = spaces.Box(
-            low=0, high=2**32, shape=shape, dtype=np.uint32)
+            low=0, high=self.high_value, shape=shape, dtype=np.uint32)
         self.metadata = {'render.modes': ['human', 'ansi']}
-        self.reward_range = (-100., float('inf'))
+        self.reward_range = (0, self.high_value)
         # init the game
         self.game = logic.Game(shape)
-        # prevent getting stuck with invalid moves
+        # don't get stuck too long
         self.invalid_moves = 0
 
     def step(self, action) -> (object, float, bool, dict):
@@ -40,13 +41,11 @@ class Env2048(gym.Env):
         '''
         self.game, score, valid = logic.game_step(
             self.game, logic.Action(action))
-        # stop on invalid move and penalize it
+        # don't get stuck
         if not valid:
             self.invalid_moves += 1
-            if self.invalid_moves > 10:
-                return (self.game.board, -50, True, None)
-        else:
-            self.invalid_moves = 0
+            if self.invalid_moves > 20:
+                return (self.game.board, score, True, None)
         # return the score of the current move
         return (self.game.board, score, self.game.finished, None)
 
@@ -59,7 +58,6 @@ class Env2048(gym.Env):
             The initial observation.
         """
         self.game.reset()
-        self.invalid_moves = 0
         return self.game.board
 
     def render(self, mode='human'):

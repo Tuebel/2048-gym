@@ -1,7 +1,7 @@
 from copy import deepcopy
 from enum import Enum
+from random import Random
 import numpy as np
-import random
 '''The logic of the game 2048.
 Purely functional so copies are created of the state.'''
 
@@ -19,19 +19,23 @@ class Game:
         shape: tuple
             The dimensions of the board.
         '''
-        self.board = new_board(shape)
+        self.random = Random()
+        self.board = new_board(shape, self.random)
         self.score = 0
         self.finished = False
-        seed()
 
     def __repr__(self):
         return f'{self.board}\n{self.score}\n{self.finished}'
 
     def reset(self):
         '''Resets the game to the initial state.'''
-        self.board = new_board(self.board.shape)
+        self.board = new_board(self.board.shape, self.random)
         self.score = 0
         self.finished = False
+
+    def seed(self, seed=None):
+        '''Set the seed of the random generator.'''
+        self.random.seed(seed)
 
 
 class Action(Enum):
@@ -66,23 +70,20 @@ def game_step(game: Game, action: Action) -> (Game, int, bool):
     # if action has not been valid the game state didn't change
     if valid:
         game.score += score
-        game.board = generate_element(game.board)
+        game.board = generate_element(game.board, game.random)
         game.finished = is_finished(game.board)
     return game, score, valid
 
 
-def seed(seed=None):
-    '''Set the seed of the random generator.'''
-    random.seed(seed)
-
-
-def generate_element(board: np.array) -> np.array:
+def generate_element(board: np.array, random: Random) -> np.array:
     '''Randomly generates a 2 or 4 on the board on an empty field.
 
     Parameters
     ----------
     board: numpy.array
         The board with empty fields.
+    random: Random
+        The random number generator
 
     Returns
     -------
@@ -100,21 +101,23 @@ def generate_element(board: np.array) -> np.array:
     return board
 
 
-def new_board(shape: tuple) -> np.array:
+def new_board(shape: tuple, random: Random) -> np.array:
     '''Generates a new board with two randomly generated elements.
 
     Parameters
     ----------
     shape: tuple
         The shape of the board.
+    random: Random
+        The random number generator
 
     Returns
     -------
     board: numpy.array
         The new board with two random elements.'''
     board = np.zeros(shape)
-    board = generate_element(board)
-    board = generate_element(board)
+    board = generate_element(board, random)
+    board = generate_element(board, random)
     return board
 
 
