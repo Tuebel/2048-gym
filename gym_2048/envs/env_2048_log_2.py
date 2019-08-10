@@ -6,11 +6,12 @@ import sys
 from six import StringIO
 
 
-class Env2048(gym.Env):
-    '''The basic 2048 environment which outputs the raw board as observation.
-    The score of each round is returned as reward so higher tile merges return
-    higher rewards. The game is finished when no valid move is possible or a
-    maximum number of invalid moves has been exceeded.'''
+class Env2048LogTwo(gym.Env):
+    '''A 2048 environment which outputs the a log_2 board an rewards so they
+    have a euclidean distance. The score of each round is returned as reward so
+    higher tile merges return higher rewards. The game is finished when no
+    valid move is possible or a maximum number of invalid moves has been
+    exceeded.'''
 
     def __init__(self, shape: tuple = (4, 4), max_invalid_moves: int = 50):
         '''Creates a new game.
@@ -24,9 +25,9 @@ class Env2048(gym.Env):
         # parametrize the gym interface
         self.action_space = spaces.Discrete(4)
         self.observation_space = spaces.Box(
-            low=0, high=2**16, shape=shape, dtype=np.uint32)
+            low=0, high=16, shape=shape, dtype=np.uint32)
         self.metadata = {'render.modes': ['human', 'ansi']}
-        self.reward_range = (0, 2**17)
+        self.reward_range = (0, 20)
         # init the game
         self.game = logic.Game(shape)
         # don't get stuck too long
@@ -59,7 +60,13 @@ class Env2048(gym.Env):
             self.invalid_moves += 1
             if self.invalid_moves > self.max_invalid_moves:
                 self.game.finished = True
-        return self.game.board, score, self.game.finished, None
+        # avoid log(0)
+        board = np.copy(self.game.board)
+        board[board == 0] = 1
+        board = np.log2(board)
+        if score > 0:
+            score = np.log2(score)
+        return (board, score, self.game.finished, None)
 
     def reset(self) -> object:
         """Resets the state of the environment and returns an initial observation.

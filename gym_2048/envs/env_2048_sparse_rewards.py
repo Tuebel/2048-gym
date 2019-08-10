@@ -6,11 +6,12 @@ import sys
 from six import StringIO
 
 
-class Env2048(gym.Env):
-    '''The basic 2048 environment which outputs the raw board as observation.
-    The score of each round is returned as reward so higher tile merges return
-    higher rewards. The game is finished when no valid move is possible or a
-    maximum number of invalid moves has been exceeded.'''
+class Env2048SparseRewards(gym.Env):
+    '''A 2048 environment which outputs the raw board as observation. Only the
+    final score is returned all other scores are zero. This challenges the
+    algorithm but might lead to long term oriented policies. The game is
+    finished when no valid move is possible or a maximum number of invalid
+    moves has been exceeded.'''
 
     def __init__(self, shape: tuple = (4, 4), max_invalid_moves: int = 50):
         '''Creates a new game.
@@ -26,7 +27,7 @@ class Env2048(gym.Env):
         self.observation_space = spaces.Box(
             low=0, high=2**16, shape=shape, dtype=np.uint32)
         self.metadata = {'render.modes': ['human', 'ansi']}
-        self.reward_range = (0, 2**17)
+        self.reward_range = (0, 2**20)
         # init the game
         self.game = logic.Game(shape)
         # don't get stuck too long
@@ -59,7 +60,11 @@ class Env2048(gym.Env):
             self.invalid_moves += 1
             if self.invalid_moves > self.max_invalid_moves:
                 self.game.finished = True
-        return self.game.board, score, self.game.finished, None
+        if self.game.finished:
+            return self.game.board, self.game.score, self.game.finished, None
+        else:
+            return self.game.board, 0, self.game.finished, None
+
 
     def reset(self) -> object:
         """Resets the state of the environment and returns an initial observation.

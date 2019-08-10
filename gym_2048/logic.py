@@ -132,12 +132,11 @@ def first_free_in_row(row: np.array) -> int:
     Returns
     -------
     index: int
-        The index of the first free element. Size of row if not free element
-        found.'''
+        The index of the first free element. None if not free element found.'''
     for i in range(0, row.size):
         if row[i] == 0:
             return i
-    return row.size
+    return None
 
 
 def transform_before_merge(board: np.array, action: Action) -> np.array:
@@ -190,8 +189,24 @@ def transform_after_merge(board: np.array, action: Action) -> np.array:
     return board
 
 
+def fill_gaps_in_row(row: np.array) -> np.array:
+    '''Fills the zero entries by moving everything to the left.
+
+    Parameters
+    ----------
+    row: np.array
+        The row to fill up'''
+    row = np.copy(row)
+    for i in range(0, row.size):
+        first_free = first_free_in_row(row)
+        if first_free and first_free < i:
+            row[first_free] = row[i]
+            row[i] = 0
+    return row
+
+
 def merge_row(row: np.array) -> (np.array, int, bool):
-    '''Merges one row from left to right. Transform the board apply the merge
+    '''Merges one row from right to left. Transform the board apply the merge
     and transform it back afterwards.
 
     Paramters
@@ -209,28 +224,22 @@ def merge_row(row: np.array) -> (np.array, int, bool):
         True if any element has been moved. False otherwise.'''
     # The whole API is purely functional
     row = np.copy(row)
-    last_merge = -1
     score = 0
     valid = False
-    for i in range(0, row.size):
-        if row[i] == 0:
-            continue
-        # move as far left as possible
-        new_index = first_free_in_row(row)
-        if new_index < i:
-            row[new_index] = row[i]
+    row = fill_gaps_in_row(row)
+    # merge neighbors
+    for i in range(1, row.size):
+        if row[i-1] == row[i]:
+            row[i-1] += row[i]
             row[i] = 0
+            score += row[i-1]
             valid = True
-        else:
-            new_index = i
-        # merge possible?
-        if (last_merge < new_index - 1
-                and row[new_index - 1] == row[new_index]):
-            row[new_index - 1] = 2 * row[new_index - 1]
-            row[new_index] = 0
-            score += row[new_index - 1]
-            valid = True
+    row = fill_gaps_in_row(row)
     return row, score, valid
+
+
+a = np.array([16, 16, 0, 32])
+print(merge_row(a))
 
 
 def merge(board: np.array, action: Action) -> (np.array, int, bool):
