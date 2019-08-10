@@ -86,7 +86,7 @@ class Env2048SparseRewards(gym.Env):
             - human: renders the board to the system output.
             - ansi: returns the string representation of the board."""
         outfile = StringIO() if mode == 'ansi' else sys.stdout
-        outfile.write(str(self.game.board)+'\n')
+        outfile.write(str(self.game.board)+'\n\n')
         if mode != 'human':
             return outfile
 

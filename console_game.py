@@ -3,7 +3,7 @@ from gym_2048.logic import Action, Game, game_step
 
 
 def main():
-    game = Game((2, 2))
+    game = Game((3, 3))
     while not game.finished:
         print(game)
         try:

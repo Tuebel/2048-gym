@@ -38,12 +38,14 @@ print('training the agent')
 sim = Simulation(create_env, agent)
 # explore and reduce epsilon
 agent.policy = EpsGreedy(0.2)
-sim.train(max_steps=50000, visualize=False, plot=plot_rewards)
+sim.train(max_steps=10000, visualize=False, plot=plot_rewards)
 agent.policy = EpsGreedy(0.1)
-sim.train(max_steps=50000, visualize=False, plot=plot_rewards)
+sim.train(max_steps=10000, visualize=False, plot=plot_rewards)
 agent.policy = EpsGreedy(0.05)
-sim.train(max_steps=50000, visualize=False, plot=plot_rewards)
+sim.train(max_steps=10000, visualize=False, plot=plot_rewards)
+agent.policy = EpsGreedy(0.01)
+sim.train(max_steps=10000, visualize=False, plot=plot_rewards)
 print('testing policy')
-sim.test_policy = EpsGreedy(0.05),
+sim.test_policy = EpsGreedy(0),
 sim.test(max_steps=1000)
 model.save('dqn_agent_log_two.tf')

@@ -25,7 +25,7 @@ class Game:
         self.finished = False
 
     def __repr__(self):
-        return f'{self.board}\n{self.score}\n{self.finished}'
+        return f'{self.board}\nScore: {self.score}\nFinished: {self.finished}\n'
 
     def reset(self):
         '''Resets the game to the initial state.'''
@@ -132,11 +132,11 @@ def first_free_in_row(row: np.array) -> int:
     Returns
     -------
     index: int
-        The index of the first free element. None if not free element found.'''
+        The index of the first free element. -1 if not free element found.'''
     for i in range(0, row.size):
         if row[i] == 0:
             return i
-    return None
+    return -1
 
 
 def transform_before_merge(board: np.array, action: Action) -> np.array:
@@ -189,20 +189,29 @@ def transform_after_merge(board: np.array, action: Action) -> np.array:
     return board
 
 
-def fill_gaps_in_row(row: np.array) -> np.array:
+def fill_gaps_in_row(row: np.array) -> (np.array, bool):
     '''Fills the zero entries by moving everything to the left.
 
     Parameters
     ----------
     row: np.array
-        The row to fill up'''
+        The row to fill up.
+        
+    Returns
+    -------
+    row: np.array
+        The merged row.
+    valid: bool
+        If any movement has been executed.'''
     row = np.copy(row)
+    valid = False
     for i in range(0, row.size):
         first_free = first_free_in_row(row)
-        if first_free and first_free < i:
+        if first_free >= 0 and first_free < i:
             row[first_free] = row[i]
             row[i] = 0
-    return row
+            valid = True
+    return row, valid
 
 
 def merge_row(row: np.array) -> (np.array, int, bool):
@@ -225,8 +234,7 @@ def merge_row(row: np.array) -> (np.array, int, bool):
     # The whole API is purely functional
     row = np.copy(row)
     score = 0
-    valid = False
-    row = fill_gaps_in_row(row)
+    row, valid = fill_gaps_in_row(row)
     # merge neighbors
     for i in range(1, row.size):
         if row[i-1] == row[i]:
@@ -234,12 +242,8 @@ def merge_row(row: np.array) -> (np.array, int, bool):
             row[i] = 0
             score += row[i-1]
             valid = True
-    row = fill_gaps_in_row(row)
+    row, _ = fill_gaps_in_row(row)
     return row, score, valid
-
-
-a = np.array([16, 16, 0, 32])
-print(merge_row(a))
 
 
 def merge(board: np.array, action: Action) -> (np.array, int, bool):
@@ -267,7 +271,8 @@ def merge(board: np.array, action: Action) -> (np.array, int, bool):
     board = transform_before_merge(board, action)
     n_rows, _ = board.shape
     for row in range(0, n_rows):
-        board[row, :], row_score, row_valid = merge_row(board[row, :])
+        merged_row, row_score, row_valid = merge_row(board[row, :])
+        board[row] = merged_row
         score += row_score
         valid |= row_valid
     board = transform_after_merge(board, action)
