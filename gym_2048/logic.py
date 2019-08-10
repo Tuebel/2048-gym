@@ -196,21 +196,22 @@ def fill_gaps_in_row(row: np.array) -> (np.array, bool):
     ----------
     row: np.array
         The row to fill up.
-        
+
     Returns
     -------
     row: np.array
         The merged row.
     valid: bool
-        If any movement has been executed.'''
+        If any nonzero movement has been executed.'''
     row = np.copy(row)
     valid = False
     for i in range(0, row.size):
-        first_free = first_free_in_row(row)
-        if first_free >= 0 and first_free < i:
-            row[first_free] = row[i]
-            row[i] = 0
-            valid = True
+        if row[i] > 0:
+            first_free = first_free_in_row(row)
+            if first_free >= 0 and first_free < i:
+                row[first_free] = row[i]
+                row[i] = 0
+                valid = True
     return row, valid
 
 
@@ -237,7 +238,7 @@ def merge_row(row: np.array) -> (np.array, int, bool):
     row, valid = fill_gaps_in_row(row)
     # merge neighbors
     for i in range(1, row.size):
-        if row[i-1] == row[i]:
+        if row[i-1] == row[i] and row[i] > 0:
             row[i-1] += row[i]
             row[i] = 0
             score += row[i-1]
