@@ -1,4 +1,4 @@
-from gym_2048.logic import Action, Game, game_step
+from game_2048 import Action, Game, game_step
 '''Play the game in the console'''
 
 

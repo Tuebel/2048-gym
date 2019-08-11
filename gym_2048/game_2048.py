@@ -25,7 +25,7 @@ class Game:
         self.finished = False
 
     def __repr__(self):
-        return f'{self.board}\nScore: {self.score}\nFinished: {self.finished}\n'
+        return f'{self.board}\nScore {self.score}\nFinished {self.finished}\n'
 
     def reset(self):
         '''Resets the game to the initial state.'''
@@ -101,12 +101,12 @@ def generate_element(board: np.array, random: Random) -> np.array:
     return board
 
 
-def new_board(shape: tuple, random: Random) -> np.array:
+def new_board(shape: (int, int), random: Random) -> np.array:
     '''Generates a new board with two randomly generated elements.
 
     Parameters
     ----------
-    shape: tuple
+    shape: (int, int)
         The shape of the board.
     random: Random
         The random number generator
@@ -154,6 +154,7 @@ def transform_before_merge(board: np.array, action: Action) -> np.array:
     board: numpy.array
         The transformed board.'''
     # LEFT does not require transformation
+    action = Action(action)
     if action == Action.RIGHT:
         board = np.fliplr(board)
     elif action == Action.UP:
@@ -179,6 +180,7 @@ def transform_after_merge(board: np.array, action: Action) -> np.array:
     board: numpy.array
         The transformed board.'''
     # LEFT does not require transformation
+    action = Action(action)
     if action == Action.RIGHT:
         board = np.fliplr(board)
     elif action == Action.UP:

@@ -8,16 +8,13 @@ score = 0
 n_steps = 20000
 for i in range(n_steps):
     action = env.action_space.sample()
-    observation, rewa
-    print(f'Final score {score}\n')rd, done, _ = env.step(action)
+    observation, reward, done, _ = env.step(action)
     score += reward
-    avg += float(score) / n_steps
     if score > highscore:
         highscore = score
     if done:
         env.reset()
+        print(f'Final score {score}\n')
         score = 0
 env.close()
 print(f'Highscore {highscore}\n')
-print(f'Average {avg}\n')
-
