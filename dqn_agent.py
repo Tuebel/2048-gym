@@ -21,7 +21,8 @@ model = Sequential([
 # Create Deep Q-Learning Network agent
 agent = DQN(model, actions=dummy_env.action_space.n, gamma=0.99,
             batch_size=64, nsteps=2, enable_double_dqn=True,
-            enable_dueling_network=True, target_update=100)
+            enable_dueling_network=True, target_update=100,
+            test_policy=EpsGreedy2048(0))
 
 
 def plot_rewards(episode_rewards, episode_steps, done=False,
@@ -33,14 +34,15 @@ def plot_rewards(episode_rewards, episode_steps, done=False,
     for ed, steps in zip(episode_rewards, episode_steps):
         plt.plot(steps, ed)
     # Pause a bit so that the graph is updated
-    plt.show() if done else plt.pause(0.0001)
+    # plt.show() if done else plt.pause(0.0001)
+    plt.pause(0.0001)
 
 
 # Create simulation, train and then test
 print('training the agent')
 sim = Simulation(create_env, agent)
 # explore and reduce epsilon
-n_eps = 3
+n_eps = 5
 eps_max = 0.1
 eps_min = 0
 for i in range(n_eps):
@@ -55,6 +57,5 @@ for i in range(n_eps):
               plot=plot_wrapper)
 
 print('testing policy')
-sim.test_policy = EpsGreedy2048(0),
 sim.test(max_steps=1000)
 model.save('dqn_agent_v0.tf')

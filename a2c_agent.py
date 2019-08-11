@@ -30,8 +30,8 @@ policy = [EpsGreedy2048(0)] + [EpsGreedy2048(eps)
                                for eps in np.arange(0, 1, 1/(instances-1))]
 
 # Create Advantage Actor-Critic agent
-agent = A2C(model, actions=dummy_env.action_space.n,
-            nsteps=2, instances=instances, policy=policy)
+agent = A2C(model, actions=dummy_env.action_space.n, nsteps=2,
+            instances=instances, policy=policy, test_policy=EpsGreedy2048(0))
 
 
 def plot_rewards(episode_rewards, episode_steps, done=False):
