@@ -3,10 +3,11 @@ import gym_2048
 import matplotlib.pyplot as plt
 import numpy as np
 from huskarl.agent import A2C
-from eps_greedy_2048 import EpsGreedy2048
+from huskarl.policy import Greedy, GaussianEpsGreedy
 from huskarl.simulation import Simulation
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dense, Flatten
+from validity_2048 import check_valid_2048
 
 
 def create_env(): return gym.make('2048-4x4-v0').unwrapped
@@ -26,12 +27,13 @@ model = Sequential([
 instances = 8
 
 # Create a policy for each instance with a different distribution for epsilon
-policy = [EpsGreedy2048(0)] + [EpsGreedy2048(eps)
-                               for eps in np.arange(0, 1, 1/(instances-1))]
+policy = [Greedy(check_valid_2048)] + [GaussianEpsGreedy(
+    eps, 0.1, check_valid_2048) for eps in np.arange(0, 1, 1/(instances-1))]
 
 # Create Advantage Actor-Critic agent
 agent = A2C(model, actions=dummy_env.action_space.n, nsteps=2,
-            instances=instances, policy=policy, test_policy=EpsGreedy2048(0))
+            instances=instances, policy=policy,
+            test_policy=Greedy(check_valid_2048))
 
 
 def plot_rewards(episode_rewards, episode_steps, done=False):
