@@ -24,9 +24,9 @@ class Env2048(gym.Env):
         # parametrize the gym interface
         self.action_space = spaces.Discrete(4)
         self.observation_space = spaces.Box(
-            low=0, high=2**16, shape=shape, dtype=np.uint32)
+            low=0, high=2048, shape=shape, dtype=np.uint32)
         self.metadata = {'render.modes': ['human', 'ansi']}
-        self.reward_range = (0, 2**17)
+        self.reward_range = (0, 2048)
         # init the game
         self.game = logic.Game(shape)
         # don't get stuck too long
@@ -70,6 +70,7 @@ class Env2048(gym.Env):
             The initial observation.
         """
         self.game.reset()
+        self.invalid_moves = 0
         return self.game.board
 
     def render(self, mode='human'):

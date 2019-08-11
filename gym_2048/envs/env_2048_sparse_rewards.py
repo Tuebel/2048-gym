@@ -75,6 +75,7 @@ class Env2048SparseRewards(gym.Env):
             The initial observation.
         """
         self.game.reset()
+        self.invalid_moves = 0
         return self.game.board
 
     def render(self, mode='human'):

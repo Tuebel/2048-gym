@@ -25,9 +25,9 @@ class Env2048LogTwo(gym.Env):
         # parametrize the gym interface
         self.action_space = spaces.Discrete(4)
         self.observation_space = spaces.Box(
-            low=0, high=16, shape=shape, dtype=np.uint32)
+            low=0, high=2048, shape=shape, dtype=np.uint32)
         self.metadata = {'render.modes': ['human', 'ansi']}
-        self.reward_range = (0, 20)
+        self.reward_range = (0, 2048)
         # init the game
         self.game = logic.Game(shape)
         # don't get stuck too long
@@ -60,12 +60,10 @@ class Env2048LogTwo(gym.Env):
             self.invalid_moves += 1
             if self.invalid_moves > self.max_invalid_moves:
                 self.game.finished = True
-        # avoid log(0)
         board = np.copy(self.game.board)
+        # avoid log(0)
         board[board == 0] = 1
         board = np.log2(board)
-        if score > 0:
-            score = np.log2(score)
         return (board, score, self.game.finished, None)
 
     def reset(self) -> object:
@@ -77,6 +75,7 @@ class Env2048LogTwo(gym.Env):
             The initial observation.
         """
         self.game.reset()
+        self.invalid_moves = 0
         return self.game.board
 
     def render(self, mode='human'):
