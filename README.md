@@ -28,4 +28,9 @@ invalid ones.
 
 ### Model architecture
 
-### Agent implementation
+### A2C Agent
+
+* Training time: It seems like the agent starts to overfit / exploit a
+suboptimal policy after some training time. Early stopping can prevent this and
+lead to a reasonable policy. For example the highest number is stored in a
+corner and values a preferably summed up at the two adjoining borders.

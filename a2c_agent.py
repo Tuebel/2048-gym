@@ -10,26 +10,20 @@ from tensorflow.python.keras.layers import Dense, Flatten
 from validity_2048 import check_valid_2048
 
 
-def create_env(): return gym.make('2048-3x3-v0').unwrapped
+def create_env(): return gym.make('2048-4x4-v0').unwrapped
 
 
 dummy_env = create_env()
 model = Sequential([
     Flatten(input_shape=dummy_env.observation_space.shape),
-    Dense(100, activation='relu'),
-    Dense(100, activation='relu'),
-    Dense(50, activation='relu'),
-    Dense(50, activation='relu'),
-    Dense(20, activation='relu'),
-    Dense(20, activation='relu'),
+    Dense(500, activation='relu'),
+    Dense(500, activation='relu'),
+    Dense(200, activation='relu'),
     Dense(4, activation='linear')
-
 ])
-
 
 # We will be running multiple concurrent environment instances
 instances = 8
-
 # Create a policy for each instance with a different distribution for epsilon
 policy = [Greedy(check_valid_2048)] + [GaussianEpsGreedy(
     eps, 0.1, check_valid_2048) for eps in np.arange(0, 1, 1/(instances-1))]
@@ -54,7 +48,7 @@ def plot_rewards(episode_rewards, episode_steps, done=False):
 # Create simulation, train and then test
 print('training the agent')
 sim = Simulation(create_env, agent)
-sim.train(max_steps=100000, instances=instances, plot=plot_rewards)
+sim.train(max_steps=25000, instances=instances, plot=plot_rewards)
 print('testing')
 sim.test(max_steps=1000)
 model.save('a2c_agent_v0.tf')

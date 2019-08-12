@@ -1,12 +1,12 @@
 import gym
 import gym_2048
 
-env = gym.make('2048-3x3-v0')
+env = gym.make('2048-4x4-v0')
 env.reset()
 score = 0
 highscore = 0
 average = 0
-n_episodes = 100
+n_episodes = 200
 for i in range(n_episodes):
     finished = False
     while not finished:
