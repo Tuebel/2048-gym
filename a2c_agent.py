@@ -10,16 +10,20 @@ from tensorflow.python.keras.layers import Dense, Flatten
 from validity_2048 import check_valid_2048
 
 
-def create_env(): return gym.make('2048-4x4-v0').unwrapped
+def create_env(): return gym.make('2048-3x3-v0').unwrapped
 
 
 dummy_env = create_env()
 model = Sequential([
     Flatten(input_shape=dummy_env.observation_space.shape),
-    Dense(200, activation='relu'),
+    Dense(100, activation='relu'),
     Dense(100, activation='relu'),
     Dense(50, activation='relu'),
-    Dense(20, activation='relu')
+    Dense(50, activation='relu'),
+    Dense(20, activation='relu'),
+    Dense(20, activation='relu'),
+    Dense(4, activation='linear')
+
 ])
 
 

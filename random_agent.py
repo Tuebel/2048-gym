@@ -1,20 +1,24 @@
 import gym
 import gym_2048
 
-env = gym.make('2048-4x4-v0')
+env = gym.make('2048-3x3-v0')
 env.reset()
-highscore = 0
 score = 0
-n_steps = 20000
-for i in range(n_steps):
-    action = env.action_space.sample()
-    observation, reward, done, _ = env.step(action)
-    score += reward
+highscore = 0
+average = 0
+n_episodes = 100
+for i in range(n_episodes):
+    finished = False
+    while not finished:
+        action = env.action_space.sample()
+        observation, reward, done, _ = env.step(action)
+        score += reward
+        finished |= done
     if score > highscore:
         highscore = score
-    if done:
-        env.reset()
-        print(f'Final score {score}\n')
-        score = 0
+    average += score / n_episodes
+    print(f'Final score {score}\n')
+    env.reset()
+    score = 0
 env.close()
-print(f'Highscore {highscore}\n')
+print(f'Highscore {highscore}\n Average {average}')
