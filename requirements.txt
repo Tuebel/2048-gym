@@ -1,4 +1,5 @@
 gym
+gym_2048
 huskarl
 matplotlib
 numpy
