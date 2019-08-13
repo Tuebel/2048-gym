@@ -16,9 +16,8 @@ def create_env(): return gym.make('2048-4x4-v0').unwrapped
 dummy_env = create_env()
 model = Sequential([
     Flatten(input_shape=dummy_env.observation_space.shape),
-    Dense(500, activation='relu'),
-    Dense(500, activation='relu'),
-    Dense(200, activation='relu'),
+    Dense(2000, activation='relu'),
+    Dense(2000, activation='relu'),
     Dense(4, activation='linear')
 ])
 
