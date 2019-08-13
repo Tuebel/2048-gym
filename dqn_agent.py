@@ -1,7 +1,7 @@
+from gym_2048.wrappers import LogObservation
 from huskarl.agent import DQN
 from huskarl.policy import Greedy, EpsGreedy
 from huskarl.simulation import Simulation
-import numpy as np
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dense, Flatten
 from validity_2048 import check_valid_2048
@@ -10,14 +10,17 @@ import gym_2048
 import matplotlib.pyplot as plt
 
 
-def create_env(): return gym.make('2048-4x4-v0').unwrapped
+def create_env():
+    '''Returns a custom environment for the agent'''
+    env = gym.make('2048-4x4-v0')
+    return LogObservation(env)
 
 
 dummy_env = create_env()
 model = Sequential([
     Flatten(input_shape=dummy_env.observation_space.shape),
-    Dense(2000, activation='relu'),
-    Dense(2000, activation='relu'),
+    Dense(500, activation='relu'),
+    Dense(500, activation='relu'),
     Dense(4, activation='linear')
 ])
 

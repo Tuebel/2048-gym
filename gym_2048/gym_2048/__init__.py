@@ -1,3 +1,9 @@
+from .game_2048 import Action
+from .game_2048 import Game
+from .game_2048 import game_step
+from .game_2048 import is_finished
+from .game_2048 import merge
+# registration of the gym envs
 from gym.envs.registration import register
 
 register(

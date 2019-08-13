@@ -39,8 +39,7 @@ class Game:
 
 
 class Action(Enum):
-    '''The state of the game is represented as two dimensional numpy array.
-    It is row major.'''
+    '''The possible moves in the game as Enum.'''
     LEFT = 0
     RIGHT = 1
     UP = 2

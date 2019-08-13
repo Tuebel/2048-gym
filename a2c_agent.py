@@ -1,16 +1,19 @@
-import gym
-import gym_2048
-import matplotlib.pyplot as plt
-import numpy as np
+from gym_2048.wrappers import OneChannel
 from huskarl.agent import A2C
 from huskarl.policy import Greedy, EpsGreedy
 from huskarl.simulation import Simulation
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dense, Flatten
 from validity_2048 import check_valid_2048
+import gym
+import gym_2048
+import matplotlib.pyplot as plt
+import numpy as np
 
 
-def create_env(): return gym.make('2048-4x4-v0').unwrapped
+def create_env():
+    env = gym.make('2048-4x4-v0')
+    return OneChannel(env)
 
 
 dummy_env = create_env()

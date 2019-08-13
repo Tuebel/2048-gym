@@ -1,4 +1,4 @@
-import game_2048
+from gym_2048 import Action, Game, game_step
 import numpy as np
 import gym
 from gym import spaces
@@ -6,11 +6,10 @@ import sys
 from six import StringIO
 
 
-class Env2048LogTwo(gym.Env):
-    '''A 2048 environment which outputs the a log_2 board an rewards so they
-    have a euclidean distance. The score of each round is returned as reward so
-    higher tile merges return higher rewards. The game is finished when no
-    valid move is possible.'''
+class Env2048(gym.Env):
+    '''The basic 2048 environment which outputs the raw board as observation.
+    The score of each round is returned as reward so higher tile merges return
+    higher rewards. The game is finished when no valid move is possible.'''
 
     def __init__(self, shape: (int, int) = (4, 4)):
         '''Creates a new game.
@@ -26,7 +25,7 @@ class Env2048LogTwo(gym.Env):
         self.metadata = {'render.modes': ['human', 'ansi']}
         self.reward_range = (0, 2048)
         # init the game
-        self.game = game_2048.Game(shape)
+        self.game = Game(shape)
 
     def step(self, action) -> (object, float, bool, dict):
         '''Execute one action in the game.
@@ -47,13 +46,9 @@ class Env2048LogTwo(gym.Env):
         info: dict
             contains auxiliary diagnostic information
         '''
-        self.game, score, valid = game_2048.game_step(
-            self.game, game_2048.Action(action))
-        board = np.copy(self.game.board)
-        # avoid log(0)
-        board[board == 0] = 1
-        board = np.log2(board)
-        return (board, score, self.game.finished, None)
+        self.game, score, valid = game_step(
+            self.game, Action(action))
+        return self.game.board, score, self.game.finished, None
 
     def reset(self) -> object:
         """Resets the state of the environment and returns an initial observation.

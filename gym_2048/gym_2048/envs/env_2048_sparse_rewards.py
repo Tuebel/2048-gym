@@ -1,12 +1,8 @@
-import game_2048
-import numpy as np
-import gym
-from gym import spaces
-import sys
-from six import StringIO
+from gym_2048.envs.env_2048 import Env2048
+from gym.spaces import Box
 
 
-class Env2048SparseRewards(gym.Env):
+class Env2048SparseRewards(Env2048):
     '''A 2048 environment which outputs the raw board as observation. Only the
     final score is returned all other scores are zero. This challenges the
     algorithm but might lead to long term oriented policies. The game is
@@ -19,14 +15,10 @@ class Env2048SparseRewards(gym.Env):
         ----------
         shape: tuple
             The shape of the board, must be two dimensional.'''
+        super(Env2048SparseRewards, self).__init__(shape)
         # parametrize the gym interface
-        self.action_space = spaces.Discrete(4)
-        self.observation_space = spaces.Box(
+        self.observation_space = Box(
             low=0, high=2**16, shape=shape, dtype=np.uint32)
-        self.metadata = {'render.modes': ['human', 'ansi']}
-        self.reward_range = (0, 2**20)
-        # init the game
-        self.game = game_2048.Game(shape)
 
     def step(self, action) -> (object, float, bool, dict):
         '''Execute one action in the game.
@@ -53,38 +45,3 @@ class Env2048SparseRewards(gym.Env):
             return self.game.board, self.game.score, self.game.finished, None
         else:
             return self.game.board, 0, self.game.finished, None
-
-    def reset(self) -> object:
-        """Resets the state of the environment and returns an initial observation.
-
-        Returns
-        -------
-        observation: object
-            The initial observation.
-        """
-        self.game.reset()
-        return self.game.board
-
-    def render(self, mode='human'):
-        """Renders the environment.
-
-        Parameters
-        ----------
-        mode: str
-            - human: renders the board to the system output.
-            - ansi: returns the string representation of the board."""
-        outfile = StringIO() if mode == 'ansi' else sys.stdout
-        outfile.write(str(self.game.board)+'\n\n')
-        if mode != 'human':
-            return outfile
-
-    def seed(self, seed=None):
-        """Sets the seed for this environments random number generator.
-
-        Returns
-        -------
-        seed
-            The main seed.
-        """
-        self.game.seed(seed)
-        return seed
