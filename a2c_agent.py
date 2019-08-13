@@ -3,7 +3,7 @@ from huskarl.agent import A2C
 from huskarl.policy import Greedy, EpsGreedy
 from huskarl.simulation import Simulation
 from tensorflow.python.keras.models import Sequential
-from tensorflow.python.keras.layers import Dense, Flatten
+from tensorflow.python.keras.layers import Conv2D, Dense, Flatten
 from validity_2048 import check_valid_2048
 import gym
 import gym_2048
@@ -18,9 +18,11 @@ def create_env():
 
 dummy_env = create_env()
 model = Sequential([
-    Flatten(input_shape=dummy_env.observation_space.shape),
-    Dense(4000, activation='relu'),
-    Dense(2000, activation='relu'),
+    Conv2D(16, 4, activation='relu', padding='same',
+           input_shape=dummy_env.observation_space.shape),
+    Flatten(),
+    Dense(500, activation='relu'),
+    Dense(500, activation='relu'),
     Dense(4, activation='linear')
 ])
 
