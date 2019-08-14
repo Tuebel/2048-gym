@@ -19,7 +19,7 @@ def create_env():
 
 dummy_env = create_env()
 model = Sequential([
-    Conv2D(16, 4, activation='relu', padding='same',
+    Conv2D(15, 3, activation='relu', padding='valid',
            input_shape=dummy_env.observation_space.shape),
     Flatten(),
     Dense(500, activation='relu'),

@@ -1,4 +1,4 @@
-from gym_2048.wrappers import OneChannel
+from gym_2048.wrappers import ClipReward, OneChannel
 from huskarl.agent import A2C
 from huskarl.policy import Greedy, EpsGreedy
 from huskarl.simulation import Simulation
@@ -13,18 +13,20 @@ import numpy as np
 
 def create_env():
     env = gym.make('2048-4x4-v0')
+    env = ClipReward(env)
     return OneChannel(env)
 
 
 dummy_env = create_env()
 model = Sequential([
-    Conv2D(16, 4, activation='relu', padding='same',
+    Conv2D(15, 3, activation='relu', padding='valid',
            input_shape=dummy_env.observation_space.shape),
     Flatten(),
     Dense(500, activation='relu'),
     Dense(500, activation='relu'),
     Dense(4, activation='linear')
 ])
+
 
 # We will be running multiple concurrent environment instances
 instances = 8
