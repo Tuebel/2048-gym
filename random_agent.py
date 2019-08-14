@@ -1,7 +1,9 @@
 import gym
 import gym_2048
+from gym_2048.wrappers import ClipReward
 
 env = gym.make('2048-4x4-v0')
+env = ClipReward(env)
 env.reset()
 score = 0
 highscore = 0
