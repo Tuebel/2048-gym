@@ -38,7 +38,7 @@ def plot_rewards(episode_rewards, episode_steps, done=False, do_show=False,
     else:
         plt.pause(0.001)
 
-
+# TODO move epochs to own class
 def run_epoch(create_env, agent, max_steps=50000, max_test_steps=500,
               do_show=False):
     '''Runs one epoch of training and testing'''
@@ -60,26 +60,22 @@ def run_epoch(create_env, agent, max_steps=50000, max_test_steps=500,
 dummy_env = create_env()
 initializer = VarianceScaling()
 model = Sequential([
-    Conv2D(15, 3, activation='relu', padding='same',
+    Conv2D(10, 3, activation='relu', padding='same',
            input_shape=dummy_env.observation_space.shape,
            kernel_initializer=initializer),
-    MaxPool2D(pool_size=(2, 2), strides=None,
-              padding='valid', data_format=None),
-    Conv2D(15, 2, activation='relu', padding='same',
-           input_shape=dummy_env.observation_space.shape,
-           kernel_initializer=initializer),
+    MaxPool2D(pool_size=(2, 2), padding='valid'),
     Flatten(),
     Dropout(0.5),
     Dense(500, activation='relu', kernel_initializer=initializer),
     Dropout(0.5),
-    Dense(500, activation='relu', kernel_initializer=initializer),
+    Dense(500, activation='relu', kernel_initializer=initializer)
 ])
 # Optimizer with sheduled learning rate decay
 optimizer = Adam(lr=3e-3, decay=1e-5)
 # Run multiple instances
 instances = 8
 # Exploration and learning rate decay after each epoch
-eps_max = 0.3
+eps_max = 0.2
 eps_decay = 0.9
 learning_rate = 3e-3
 learning_decay = 0.9
@@ -98,13 +94,14 @@ for epoch in range(20):
     agent.policy = policy
     agent.model.optimizer.lr = learning_rate
     # Run epoch
-    print(f'Running epoch {epoch}')
-    run_epoch(create_env, agent, max_steps=10000, max_test_steps=500,
+    print(f'Epoch {epoch}')
+    run_epoch(create_env, agent, max_steps=20000, max_test_steps=500,
               do_show=False)
     # Decay
     eps_max *= eps_decay
     learning_rate *= learning_decay
-    plt.savefig(f'epoch_{epoch}.png')
+    # logging
+    plt.savefig(f'a2c_epoch_{epoch}.png')
 # Show plot of final epoch
 run_epoch(create_env, agent, max_steps=5000, max_test_steps=500,
           do_show=True)
