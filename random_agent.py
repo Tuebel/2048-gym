@@ -9,11 +9,14 @@ score = 0
 highscore = 0
 average = 0
 n_episodes = 200
+steps = 0
+avg_steps = 0
 for i in range(n_episodes):
     finished = False
     while not finished:
         action = env.action_space.sample()
         observation, reward, done, _ = env.step(action)
+        steps += 1
         score += reward
         finished |= done
     if score > highscore:
@@ -23,4 +26,6 @@ for i in range(n_episodes):
     env.reset()
     score = 0
 env.close()
-print(f'Highscore {highscore}\n Average {average}')
+avg_steps = steps / n_episodes
+print(f'Highscore {highscore}\nAverage {average}\nSteps {steps}'
+      f' average {avg_steps}')

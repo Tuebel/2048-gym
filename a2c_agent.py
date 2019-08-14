@@ -3,7 +3,7 @@ from huskarl.agent import A2C
 from huskarl.policy import Greedy, EpsGreedy
 from huskarl.simulation import Simulation
 from tensorflow.python.keras.initializers import VarianceScaling
-from tensorflow.python.keras.layers import Conv2D, Dense, Flatten, MaxPool2D
+from tensorflow.python.keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPool2D
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.optimizers import Adam
 from validity_2048 import check_valid_2048
@@ -22,12 +22,13 @@ def create_env():
     return OneChannel(env)
 
 
-def plot_rewards(episode_rewards, episode_steps, done=False, do_show=False):
+def plot_rewards(episode_rewards, episode_steps, done=False, do_show=False,
+                 title='A2C rewards'):
     '''Plot the rewards of each episode'''
     plt.clf()
     plt.xlabel('Step')
     plt.ylabel('Reward')
-    plt.title('A2C rewards')
+    plt.title(title)
     # for i, (ed, steps) in enumerate(zip(episode_rewards, episode_steps)):
     #     plt.plot(steps, ed, alpha=0.5 if i == 0 else 0.2,
     #              linewidth=2 if i == 0 else 1)
@@ -52,6 +53,9 @@ def run_epoch(create_env, agent, max_steps=50000, max_test_steps=500,
 
 
 # Create model
+#   - Convolutions: spatial observations
+#   - Dropout: catastrophic forgetting (high numbers, what were low one?)
+#     https://arxiv.org/pdf/1312.6211.pdf
 
 dummy_env = create_env()
 initializer = VarianceScaling()
@@ -61,11 +65,13 @@ model = Sequential([
            kernel_initializer=initializer),
     MaxPool2D(pool_size=(2, 2), strides=None,
               padding='valid', data_format=None),
-    Conv2D(15, 2, activation='relu', padding='valid',
+    Conv2D(15, 2, activation='relu', padding='same',
            input_shape=dummy_env.observation_space.shape,
            kernel_initializer=initializer),
     Flatten(),
+    Dropout(0.5),
     Dense(500, activation='relu', kernel_initializer=initializer),
+    Dropout(0.5),
     Dense(500, activation='relu', kernel_initializer=initializer),
 ])
 # Optimizer with sheduled learning rate decay
@@ -92,6 +98,7 @@ for epoch in range(20):
     agent.policy = policy
     agent.model.optimizer.lr = learning_rate
     # Run epoch
+    print(f'Running epoch {epoch}')
     run_epoch(create_env, agent, max_steps=10000, max_test_steps=500,
               do_show=False)
     # Decay
