@@ -36,9 +36,9 @@ lead to a reasonable policy. For example the highest number is stored in a
 corner and values a preferably summed up at the two adjoining borders.
 
 ## TODO
-[ ] Create Jupyter notebook for better documentation of the test runs
-[ ] huskarl.Simulation callback for end of episode, final observation 
+- [ ] Create Jupyter notebook for better documentation of the test runs
+- [ ] huskarl.Simulation callback for end of episode, final observation 
 -> log high score, highest tile (create nice dotplot with distribution)
-[ ] huskarl.Simulation callback to log observation -> action pairs
-[ ] huskarl.Simulation n_episodes instead of steps?
-[ ] Animate GIF to show how the agent plays
+- [ ] huskarl.Simulation callback to log observation -> action pairs
+- [ ] huskarl.Simulation n_episodes instead of steps?
+- [ ] Animate GIF to show how the agent plays
