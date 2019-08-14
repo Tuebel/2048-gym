@@ -1,4 +1,4 @@
-from gym_2048 import Action, Game, game_step
+from gym_2048 import Action, Game, game_step, get_info
 import numpy as np
 import gym
 from gym import spaces
@@ -44,11 +44,12 @@ class Env2048(gym.Env):
         done: bool
             Whether the episode has ended.
         info: dict
-            contains auxiliary diagnostic information
+            'score': int - the score of the game
+            'high_tile': int - the highest tile in the game
         '''
         self.game, score, valid = game_step(
             self.game, Action(action))
-        return self.game.board, score, self.game.finished, None
+        return self.game.board, score, self.game.finished, get_info(self.game)
 
     def reset(self) -> object:
         """Resets the state of the environment and returns an initial observation.

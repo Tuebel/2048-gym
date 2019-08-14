@@ -300,3 +300,32 @@ def is_finished(board: np.array) -> bool:
         if valid:
             return False
     return True
+
+def highest_tile(board: np.array) -> int:
+    '''Finds the highest tile number
+
+    Parameters
+    ----------
+    board: numpy.array
+        Find the highest tile of this board.
+    
+    Returns
+    -------
+    result: int
+        The highest tile number in the game.'''
+    return np.amax(board)
+
+def get_info(game: Game) -> dict:
+    '''Returns infos about the current game state
+
+    Parameters
+    ----------
+    game: Game
+        The game to describe.
+    
+    Returns
+    -------
+    dict: {'score': int, 'high_tile': int}
+        The score and highest tile number of the game.'''
+    h_tile = highest_tile(game.board)
+    return {'score': game.score, 'high_tile': h_tile}

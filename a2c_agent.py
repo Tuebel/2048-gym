@@ -6,7 +6,6 @@ from tensorflow.python.keras.initializers import VarianceScaling
 from tensorflow.python.keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPool2D
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.optimizers import Adam
-from validity_2048 import check_valid_2048
 import gym
 import gym_2048
 import matplotlib.pyplot as plt
@@ -38,18 +37,19 @@ def plot_rewards(episode_rewards, episode_steps, done=False, do_show=False,
     else:
         plt.pause(0.001)
 
-# TODO move epochs to own class
+
 def run_epoch(create_env, agent, max_steps=50000, max_test_steps=500,
               do_show=False):
     '''Runs one epoch of training and testing'''
+    # TODO move epochs to own class
     def plot_epoch(rewards, steps, done=False): plot_rewards(
         rewards, steps, done=done, do_show=do_show)
     # train the instance
     sim = Simulation(create_env, agent)
-    sim.train(max_steps=max_steps, instances=instances, plot=plot_rewards)
+    sim.train(max_steps=max_steps, instances=instances, max_subprocesses=2,
+              plot=plot_rewards, log_info=lambda info: print(info))
     # test
-    sim.test(max_steps=max_test_steps)
-    # TODO modify huskarl to analyze the observation: highscore, avg
+    sim.test(max_steps=max_test_steps, log_info=lambda info: print(info))
 
 
 # Create model
@@ -82,13 +82,13 @@ learning_decay = 0.9
 # Create Advantage Actor-Critic agent
 agent = A2C(model, actions=dummy_env.action_space.n, nsteps=2,
             instances=instances, optimizer=optimizer,
-            test_policy=Greedy(check_valid_2048))
+            test_policy=Greedy(gym_2048.check_valid))
 
 # Run epochs
 for epoch in range(20):
     # Create a policy for each instance with a different eps
-    policy = [Greedy(check_valid_2048)] + [
-        EpsGreedy(eps, check_valid_2048) for eps in np.arange(
+    policy = [Greedy(gym_2048.check_valid)] + [
+        EpsGreedy(eps, gym_2048.check_valid) for eps in np.arange(
             0, eps_max, eps_max/(instances-1))]
     # Update agent
     agent.policy = policy

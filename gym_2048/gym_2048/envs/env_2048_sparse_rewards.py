@@ -1,5 +1,7 @@
-from gym_2048.envs.env_2048 import Env2048
+from gym_2048 import Action, game_step, get_info
+from gym_2048.envs import Env2048
 from gym.spaces import Box
+import numpy as np
 
 
 class Env2048SparseRewards(Env2048):
@@ -39,9 +41,10 @@ class Env2048SparseRewards(Env2048):
         info: dict
             contains auxiliary diagnostic information
         '''
-        self.game, score, valid = game_2048.game_step(
-            self.game, game_2048.Action(action))
+        self.game, score, valid = game_step(
+            self.game, Action(action))
         if self.game.finished:
-            return self.game.board, self.game.score, self.game.finished, None
+            return (self.game.board, self.game.score, self.game.finished,
+                    get_info(self.game))
         else:
-            return self.game.board, 0, self.game.finished, None
+            return self.game.board, 0, self.game.finished, get_info(self.game)
