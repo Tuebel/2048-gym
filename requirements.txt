@@ -4,3 +4,4 @@ huskarl
 matplotlib
 numpy
 numpydoc
+pickle

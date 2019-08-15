@@ -46,10 +46,11 @@ def run_epoch(create_env, agent, max_steps=50000, max_test_steps=500,
         rewards, steps, done=done, do_show=do_show)
     # train the instance
     sim = Simulation(create_env, agent)
-    sim.train(max_steps=max_steps, instances=instances, max_subprocesses=2,
-              plot=plot_rewards, log_info=lambda info: print(info))
+    print('training')
+    sim.train(max_steps=max_steps, instances=instances)
     # test
-    sim.test(max_steps=max_test_steps, log_info=lambda info: print(info))
+    print('testing')
+    sim.test(max_steps=max_test_steps, visualize=False)
 
 
 # Create model
@@ -95,7 +96,7 @@ for epoch in range(20):
     agent.model.optimizer.lr = learning_rate
     # Run epoch
     print(f'Epoch {epoch}')
-    run_epoch(create_env, agent, max_steps=20000, max_test_steps=500,
+    run_epoch(create_env, agent, max_steps=2000, max_test_steps=500,
               do_show=False)
     # Decay
     eps_max *= eps_decay

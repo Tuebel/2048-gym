@@ -20,8 +20,13 @@ class Game:
             The dimensions of the board.
         '''
         self.random = Random()
+        # state of the game
         self.board = new_board(shape, self.random)
+        # score = sum of merged number
         self.score = 0
+        # number of valid steps executed
+        self.steps = 0
+        # no valid move possible
         self.finished = False
 
     def __repr__(self):
@@ -31,6 +36,7 @@ class Game:
         '''Resets the game to the initial state.'''
         self.board = new_board(self.board.shape, self.random)
         self.score = 0
+        self.steps = 0
         self.finished = False
 
     def seed(self, seed=None):
@@ -69,6 +75,7 @@ def game_step(game: Game, action: Action) -> (Game, int, bool):
     # if action has not been valid the game state didn't change
     if valid:
         game.score += score
+        game.steps += 1
         game.board = generate_element(game.board, game.random)
         game.finished = is_finished(game.board)
     return game, score, valid
@@ -301,6 +308,7 @@ def is_finished(board: np.array) -> bool:
             return False
     return True
 
+
 def highest_tile(board: np.array) -> int:
     '''Finds the highest tile number
 
@@ -308,12 +316,13 @@ def highest_tile(board: np.array) -> int:
     ----------
     board: numpy.array
         Find the highest tile of this board.
-    
+
     Returns
     -------
     result: int
         The highest tile number in the game.'''
     return np.amax(board)
+
 
 def get_info(game: Game) -> dict:
     '''Returns infos about the current game state
@@ -322,10 +331,10 @@ def get_info(game: Game) -> dict:
     ----------
     game: Game
         The game to describe.
-    
+
     Returns
     -------
     dict: {'score': int, 'high_tile': int}
         The score and highest tile number of the game.'''
     h_tile = highest_tile(game.board)
-    return {'score': game.score, 'high_tile': h_tile}
+    return {'score': game.score, 'high_tile': h_tile, 'steps': game.steps}

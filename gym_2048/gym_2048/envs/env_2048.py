@@ -46,7 +46,7 @@ class Env2048(gym.Env):
         info: dict
             'score': int - the score of the game
             'high_tile': int - the highest tile in the game
-        '''
+            'steps: int - number of valid steps executed'''
         self.game, score, valid = game_step(
             self.game, Action(action))
         return self.game.board, score, self.game.finished, get_info(self.game)

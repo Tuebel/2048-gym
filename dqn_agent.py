@@ -78,11 +78,9 @@ for epoch in range(20):
     agent.model.optimizer.lr = learning_rate
     # explore then exploit
     agent.policy = explore_policy
-    sim.train(max_steps=20000, visualize=False, plot=plot_rewards,
-              log_info=lambda info: print(info))
+    sim.train(max_steps=20000, visualize=False)
     agent.policy = exploit_policy
-    sim.train(max_steps=2000, visualize=False, plot=plot_rewards,
-              log_info=lambda info: print(info))
+    sim.train(max_steps=2000, visualize=False)
     explore_policy.eps *= eps_decay
     # Decay
     eps *= eps_decay

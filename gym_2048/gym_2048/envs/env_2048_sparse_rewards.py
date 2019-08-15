@@ -39,8 +39,9 @@ class Env2048SparseRewards(Env2048):
         done: bool
             Whether the episode has ended.
         info: dict
-            contains auxiliary diagnostic information
-        '''
+            'score': int - the score of the game
+            'high_tile': int - the highest tile in the game
+            'steps: int - number of valid steps executed'''
         self.game, score, valid = game_step(
             self.game, Action(action))
         if self.game.finished:
