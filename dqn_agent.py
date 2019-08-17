@@ -3,9 +3,8 @@ from huskarl.agent import DQN
 from huskarl.policy import Greedy, EpsGreedy
 from huskarl.simulation import Simulation
 from tensorflow.python.keras.initializers import VarianceScaling
-from tensorflow.python.keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPool2D
+from tensorflow.python.keras.layers import Conv2D, Dense, Dropout, Flatten
 from tensorflow.python.keras.models import Sequential
-from tensorflow.python.keras.layers import Conv2D, Dense, Flatten
 import gym
 import gym_2048
 import matplotlib.pyplot as plt
@@ -21,15 +20,15 @@ def create_env():
 dummy_env = create_env()
 initializer = VarianceScaling()
 model = Sequential([
-    Conv2D(10, 3, activation='relu', padding='same',
+    Conv2D(8, 4, activation='elu', padding='same',
            input_shape=dummy_env.observation_space.shape,
            kernel_initializer=initializer),
-    MaxPool2D(pool_size=(2, 2), padding='valid'),
+    Conv2D(16, 2, activation='elu', padding='valid',
+           input_shape=dummy_env.observation_space.shape,
+           kernel_initializer=initializer),
     Flatten(),
     Dropout(0.5),
-    Dense(500, activation='relu', kernel_initializer=initializer),
-    Dropout(0.5),
-    Dense(500, activation='relu', kernel_initializer=initializer)
+    Dense(512, activation='elu', kernel_initializer=initializer)
 ])
 
 # Exploration and learning rate decay after each epoch
@@ -41,7 +40,7 @@ explore_policy = EpsGreedy(eps, gym_2048.check_valid)
 exploit_policy = Greedy(gym_2048.check_valid)
 # Create Deep Q-Learning Network agent
 agent = DQN(model, actions=dummy_env.action_space.n, gamma=0.99,
-            batch_size=64, nsteps=2, enable_double_dqn=True,
+            batch_size=64, nsteps=50, enable_double_dqn=True,
             enable_dueling_network=True, target_update=10,
             test_policy=exploit_policy)
 
@@ -64,7 +63,7 @@ def plot_rewards(episode_rewards, episode_steps, done=False,
     plt.xlabel('Step')
     plt.ylabel('Reward')
     plt.title('DQN rewards')
-    plt.plot(episode_steps[0], episode_rewards[0])
+    plt.plot(episode_steps[0], episode_rewards[0], '#8A2BE2')
     plt.pause(0.0001)
 
 
@@ -78,15 +77,15 @@ for epoch in range(20):
     agent.model.optimizer.lr = learning_rate
     # explore then exploit
     agent.policy = explore_policy
-    sim.train(max_steps=20000, visualize=False)
+    sim.train(max_steps=20000, visualize=False, plot=plot_rewards)
     agent.policy = exploit_policy
-    sim.train(max_steps=2000, visualize=False)
+    # logging
+    plt.savefig(f'dqn_epoch_{epoch}.png')
+    sim.train(max_steps=2000, visualize=False, plot=plot_rewards)
     explore_policy.eps *= eps_decay
     # Decay
     eps *= eps_decay
     learning_rate *= learning_decay
-    # logging
-    plt.savefig(f'dqn_epoch_{epoch}.png')
 
 agent.policy = exploit_policy
 sim.train(max_steps=2000, visualize=False, plot=plot_rewards_show,

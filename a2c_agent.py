@@ -47,7 +47,8 @@ def run_epoch(create_env, agent, max_steps=50000, max_test_steps=500,
     # train the instance
     sim = Simulation(create_env, agent)
     print('training')
-    sim.train(max_steps=max_steps, instances=instances)
+    sim.train(max_steps=max_steps, instances=instances, max_subprocesses=0,
+              plot=plot_rewards)
     # test
     print('testing')
     sim.test(max_steps=max_test_steps, visualize=False)
@@ -61,15 +62,15 @@ def run_epoch(create_env, agent, max_steps=50000, max_test_steps=500,
 dummy_env = create_env()
 initializer = VarianceScaling()
 model = Sequential([
-    Conv2D(10, 3, activation='relu', padding='same',
+    Conv2D(8, 4, activation='elu', padding='same',
            input_shape=dummy_env.observation_space.shape,
            kernel_initializer=initializer),
-    MaxPool2D(pool_size=(2, 2), padding='valid'),
+    Conv2D(16, 2, activation='elu', padding='valid',
+           input_shape=dummy_env.observation_space.shape,
+           kernel_initializer=initializer),
     Flatten(),
     Dropout(0.5),
-    Dense(500, activation='relu', kernel_initializer=initializer),
-    Dropout(0.5),
-    Dense(500, activation='relu', kernel_initializer=initializer)
+    Dense(512, activation='elu', kernel_initializer=initializer)
 ])
 # Optimizer with sheduled learning rate decay
 optimizer = Adam(lr=3e-3, decay=1e-5)
@@ -81,7 +82,7 @@ eps_decay = 0.9
 learning_rate = 3e-3
 learning_decay = 0.9
 # Create Advantage Actor-Critic agent
-agent = A2C(model, actions=dummy_env.action_space.n, nsteps=2,
+agent = A2C(model, actions=dummy_env.action_space.n, nsteps=20,
             instances=instances, optimizer=optimizer,
             test_policy=Greedy(gym_2048.check_valid))
 
@@ -96,7 +97,7 @@ for epoch in range(20):
     agent.model.optimizer.lr = learning_rate
     # Run epoch
     print(f'Epoch {epoch}')
-    run_epoch(create_env, agent, max_steps=2000, max_test_steps=500,
+    run_epoch(create_env, agent, max_steps=10000, max_test_steps=500,
               do_show=False)
     # Decay
     eps_max *= eps_decay
